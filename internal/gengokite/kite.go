@@ -10,7 +10,7 @@ import (
 
 const (
 	contextPackage = protogen.GoImportPath("context")
-	kitePackage    = protogen.GoImportPath("git.dhgames.cn/svr_comm/kiteg/rpc")
+	kitePackage    = protogen.GoImportPath("git.dhgames.cn/svr_comm/kiteg/kiterpc")
 	codesPackage   = protogen.GoImportPath("google.golang.org/grpc/codes")
 	statusPackage  = protogen.GoImportPath("google.golang.org/grpc/status")
 )
