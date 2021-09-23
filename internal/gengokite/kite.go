@@ -10,9 +10,9 @@ import (
 
 const (
 	contextPackage = protogen.GoImportPath("context")
-	kitePackage    = protogen.GoImportPath("git.dhgames.cn/svr_comm/kiteg")
-	codesPackage   = protogen.GoImportPath("git.dhgames.cn/svr_comm/kiteg/codes")
-	statusPackage  = protogen.GoImportPath("git.dhgames.cn/svr_comm/kiteg/status")
+	kitePackage    = protogen.GoImportPath("git.dhgames.cn/svr_comm/kiteg/kiteprotoc")
+	codesPackage   = protogen.GoImportPath("git.dhgames.cn/svr_comm/kiteg/kiteprotoc/codes")
+	statusPackage  = protogen.GoImportPath("git.dhgames.cn/svr_comm/kiteg/kiteprotoc/status")
 )
 
 // GenerateFile generates a _kite.pb.go file containing gRPC service definitions.
