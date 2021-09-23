@@ -9,10 +9,9 @@ import (
 )
 
 const (
-	contextPackage = protogen.GoImportPath("context")
-	kitePackage    = protogen.GoImportPath("git.dhgames.cn/svr_comm/kiteg/kiterpc")
-	codesPackage   = protogen.GoImportPath("google.golang.org/grpc/codes")
-	statusPackage  = protogen.GoImportPath("google.golang.org/grpc/status")
+	kitePackage   = protogen.GoImportPath("git.dhgames.cn/svr_comm/kiteg/kiterpc")
+	codesPackage  = protogen.GoImportPath("google.golang.org/grpc/codes")
+	statusPackage = protogen.GoImportPath("google.golang.org/grpc/status")
 )
 
 // GenerateFile generates a _kite.pb.go file containing gRPC service definitions.
@@ -38,7 +37,6 @@ func GenerateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 
 	// TODO: Remove this. We don't need to include these references any more.
 	g.P("// Reference imports to suppress errors if they are not otherwise used.")
-	g.P("var _ ", contextPackage.Ident("Context"))
 	g.P("var _ ", kitePackage.Ident("ClientConnInterface"))
 	g.P()
 
@@ -196,9 +194,9 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 }
 
 func clientSignature(g *protogen.GeneratedFile, method *protogen.Method) string {
-	s := method.GoName + "(ctx " + g.QualifiedGoIdent(contextPackage.Ident("Context"))
+	s := method.GoName + "("
 	if !method.Desc.IsStreamingClient() {
-		s += ", in *" + g.QualifiedGoIdent(method.Input.GoIdent)
+		s += "in *" + g.QualifiedGoIdent(method.Input.GoIdent)
 	}
 	s += ", opts ..." + g.QualifiedGoIdent(kitePackage.Ident("CallOption")) + ") ("
 	if !method.Desc.IsStreamingClient() && !method.Desc.IsStreamingServer() {
@@ -220,7 +218,7 @@ func genClientMethod(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 	g.P("func (c *", unexport(service.GoName), "Client) ", clientSignature(g, method), "{")
 	if !method.Desc.IsStreamingServer() && !method.Desc.IsStreamingClient() {
 		g.P("out := new(", method.Output.GoIdent, ")")
-		g.P(`err := c.cc.Invoke(ctx, "`, sname, `", in, out, opts...)`)
+		g.P(`err := c.cc.Invoke("`, sname, `", in, out, opts...)`)
 		g.P("if err != nil { return nil, err }")
 		g.P("return out, nil")
 		g.P("}")
@@ -293,7 +291,6 @@ func serverSignature(g *protogen.GeneratedFile, method *protogen.Method) string 
 	var reqArgs []string
 	ret := "error"
 	if !method.Desc.IsStreamingClient() && !method.Desc.IsStreamingServer() {
-		reqArgs = append(reqArgs, g.QualifiedGoIdent(contextPackage.Ident("Context")))
 		ret = "(*" + g.QualifiedGoIdent(method.Output.GoIdent) + ", error)"
 	}
 	if !method.Desc.IsStreamingClient() {
@@ -310,10 +307,10 @@ func genServerMethod(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 	hname := fmt.Sprintf("_%s_%s_Handler", service.GoName, method.GoName)
 
 	if !method.Desc.IsStreamingClient() && !method.Desc.IsStreamingServer() {
-		g.P("func ", hname, "(srv interface{}, ctx ", contextPackage.Ident("Context"), ", dec func(interface{}) error) (interface{}, error) {")
+		g.P("func ", hname, "(srv interface{}, dec func(interface{}) error) (interface{}, error) {")
 		g.P("in := new(", method.Input.GoIdent, ")")
 		g.P("if err := dec(in); err != nil { return nil, err }")
-		g.P("return srv.(", service.GoName, "Server).", method.GoName, "(ctx, in)")
+		g.P("return srv.(", service.GoName, "Server).", method.GoName, "(in)")
 		g.P("}")
 		g.P()
 		return hname
