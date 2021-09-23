@@ -22,6 +22,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/golang/protobuf/internal/gengokite"
 	"strings"
 
 	"github.com/golang/protobuf/internal/gengogrpc"
@@ -50,10 +51,13 @@ func main() {
 		ImportRewriteFunc: importRewriteFunc,
 	}.Run(func(gen *protogen.Plugin) error {
 		grpc := false
+		kite := false
 		for _, plugin := range strings.Split(*plugins, ",") {
 			switch plugin {
 			case "grpc":
 				grpc = true
+			case "kite":
+				kite = true
 			case "":
 			default:
 				return fmt.Errorf("protoc-gen-go: unknown plugin %q", plugin)
@@ -66,6 +70,9 @@ func main() {
 			g := gengo.GenerateFile(gen, f)
 			if grpc {
 				gengogrpc.GenerateFileContent(gen, f, g)
+			}
+			if kite {
+				gengokite.GenerateFileContent(gen, f, g)
 			}
 		}
 		gen.SupportedFeatures = gengo.SupportedFeatures
