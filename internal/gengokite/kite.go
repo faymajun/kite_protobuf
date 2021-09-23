@@ -310,18 +310,10 @@ func genServerMethod(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 	hname := fmt.Sprintf("_%s_%s_Handler", service.GoName, method.GoName)
 
 	if !method.Desc.IsStreamingClient() && !method.Desc.IsStreamingServer() {
-		g.P("func ", hname, "(srv interface{}, ctx ", contextPackage.Ident("Context"), ", dec func(interface{}) error, interceptor ", kitePackage.Ident("UnaryServerInterceptor"), ") (interface{}, error) {")
+		g.P("func ", hname, "(srv interface{}, ctx ", contextPackage.Ident("Context"), ", dec func(interface{}) error) (interface{}, error) {")
 		g.P("in := new(", method.Input.GoIdent, ")")
 		g.P("if err := dec(in); err != nil { return nil, err }")
-		g.P("if interceptor == nil { return srv.(", service.GoName, "Server).", method.GoName, "(ctx, in) }")
-		g.P("info := &", kitePackage.Ident("UnaryServerInfo"), "{")
-		g.P("Server: srv,")
-		g.P("FullMethod: ", strconv.Quote(fmt.Sprintf("/%s/%s", service.Desc.FullName(), method.GoName)), ",")
-		g.P("}")
-		g.P("handler := func(ctx ", contextPackage.Ident("Context"), ", req interface{}) (interface{}, error) {")
-		g.P("return srv.(", service.GoName, "Server).", method.GoName, "(ctx, req.(*", method.Input.GoIdent, "))")
-		g.P("}")
-		g.P("return interceptor(ctx, in, info, handler)")
+		g.P("return srv.(", service.GoName, "Server).", method.GoName, "(ctx, in)")
 		g.P("}")
 		g.P()
 		return hname
