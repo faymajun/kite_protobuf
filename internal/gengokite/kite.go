@@ -2,10 +2,11 @@ package gengokite
 
 import (
 	"fmt"
-	"google.golang.org/protobuf/compiler/protogen"
-	"google.golang.org/protobuf/types/descriptorpb"
 	"strconv"
 	"strings"
+
+	"google.golang.org/protobuf/compiler/protogen"
+	"google.golang.org/protobuf/types/descriptorpb"
 )
 
 const (
@@ -146,6 +147,13 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 	serviceDescVar := service.GoName + "_serviceDesc"
 	g.P("func Register", service.GoName, "Server(s *", kitePackage.Ident("Server"), ", srv ", serverType, ") {")
 	g.P("s.RegisterService(&", serviceDescVar, `, srv)`)
+	g.P("}")
+	g.P()
+
+	g.P("func Reg", service.GoName, "Server(srv ", serverType, ") ", kitePackage.Ident("Stub"), " {")
+	g.P("return ", kitePackage.Ident("Stub"), "{")
+	g.P("SD: &", serviceDescVar, ",")
+	g.P("SS: srv}")
 	g.P("}")
 	g.P()
 
