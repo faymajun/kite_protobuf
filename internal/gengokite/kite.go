@@ -10,9 +10,7 @@ import (
 )
 
 const (
-	kitePackage   = protogen.GoImportPath("git.dhgames.cn/svr_comm/kiteg/kiterpc")
-	codesPackage  = protogen.GoImportPath("google.golang.org/grpc/codes")
-	statusPackage = protogen.GoImportPath("google.golang.org/grpc/status")
+	kitePackage = protogen.GoImportPath("git.dhgames.cn/svr_comm/kiteg/kiterpc")
 )
 
 // GenerateFile generates a _kite.pb.go file containing gRPC service definitions.
@@ -124,22 +122,6 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 	g.P("}")
 	g.P()
 
-	// Server Unimplemented struct for forward compatibility.
-	g.P("// Unimplemented", serverType, " can be embedded to have forward compatible implementations.")
-	g.P("type Unimplemented", serverType, " struct {")
-	g.P("}")
-	g.P()
-	for _, method := range service.Methods {
-		nilArg := ""
-		if !method.Desc.IsStreamingClient() && !method.Desc.IsStreamingServer() {
-			nilArg = "nil,"
-		}
-		g.P("func (*Unimplemented", serverType, ") ", serverSignature(g, method), "{")
-		g.P("return ", nilArg, statusPackage.Ident("Errorf"), "(", codesPackage.Ident("Unimplemented"), `, "method `, method.GoName, ` not implemented")`)
-		g.P("}")
-	}
-	g.P()
-
 	// Server registration.
 	if service.Desc.Options().(*descriptorpb.ServiceOptions).GetDeprecated() {
 		g.P(deprecationComment)
@@ -176,23 +158,6 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 		g.P("{")
 		g.P("MethodName: ", strconv.Quote(string(method.Desc.Name())), ",")
 		g.P("Handler: ", handlerNames[i], ",")
-		g.P("},")
-	}
-	g.P("},")
-	g.P("Streams: []", kitePackage.Ident("StreamDesc"), "{")
-	for i, method := range service.Methods {
-		if !method.Desc.IsStreamingClient() && !method.Desc.IsStreamingServer() {
-			continue
-		}
-		g.P("{")
-		g.P("StreamName: ", strconv.Quote(string(method.Desc.Name())), ",")
-		g.P("Handler: ", handlerNames[i], ",")
-		if method.Desc.IsStreamingServer() {
-			g.P("ServerStreams: true,")
-		}
-		if method.Desc.IsStreamingClient() {
-			g.P("ClientStreams: true,")
-		}
 		g.P("},")
 	}
 	g.P("},")
