@@ -10,7 +10,10 @@ import (
 )
 
 const (
-	kitePackage = protogen.GoImportPath("git.dhgames.cn/svr_comm/kiteg/kiterpc")
+	// 接口
+	kitePackage = protogen.GoImportPath("git.dhgames.cn/svr_comm/kiteg/kiterpc/ikiterpc")
+	// 实现
+	kitePack = protogen.GoImportPath("git.dhgames.cn/svr_comm/kiteg/kiterpc")
 )
 
 // GenerateFile generates a _kite.pb.go file containing gRPC service definitions.
@@ -36,7 +39,7 @@ func GenerateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 
 	// TODO: Remove this. We don't need to include these references any more.
 	g.P("// Reference imports to suppress errors if they are not otherwise used.")
-	g.P("var _ ", kitePackage.Ident("ClientConnInterface"))
+	g.P("var _ ", kitePackage.Ident("IClientConn"))
 	g.P()
 
 	g.P("// This is a compile-time assertion to ensure that this generated file")
@@ -75,7 +78,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 
 	// Client structure.
 	g.P("type ", unexport(clientName), " struct {")
-	g.P("cc ", kitePackage.Ident("ClientConnInterface"))
+	g.P("cc ", kitePackage.Ident("IClientConn"))
 	g.P("}")
 	g.P()
 
@@ -83,7 +86,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 	if service.Desc.Options().(*descriptorpb.ServiceOptions).GetDeprecated() {
 		g.P(deprecationComment)
 	}
-	g.P("func New", clientName, " (cc ", kitePackage.Ident("ClientConnInterface"), ") ", clientName, " {")
+	g.P("func New", clientName, " (cc ", kitePackage.Ident("IClientConn"), ") ", clientName, " {")
 	g.P("return &", unexport(clientName), "{cc}")
 	g.P("}")
 	g.P()
@@ -127,7 +130,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 		g.P(deprecationComment)
 	}
 	serviceDescVar := service.GoName + "_serviceDesc"
-	g.P("func Register", service.GoName, "Server(s *", kitePackage.Ident("Server"), ", srv ", serverType, ") {")
+	g.P("func Register", service.GoName, "Server(s *", kitePack.Ident("Server"), ", srv ", serverType, ") {")
 	g.P("s.RegisterService(&", serviceDescVar, `, srv)`)
 	g.P("}")
 	g.P()
