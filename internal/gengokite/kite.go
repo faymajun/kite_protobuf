@@ -2,6 +2,7 @@ package gengokite
 
 import (
 	"fmt"
+	"path"
 	"strconv"
 	"strings"
 
@@ -184,7 +185,9 @@ func clientSignature(g *protogen.GeneratedFile, method *protogen.Method) string 
 
 func genClientMethod(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, method *protogen.Method, index int) {
 	service := method.Parent
-	sname := fmt.Sprintf("/%s/%s", service.Desc.FullName(), method.Desc.Name())
+	// 获取文件名
+	fileName := path.Base(file.GeneratedFilenamePrefix)
+	sname := fmt.Sprintf("%s/%s/%s", fileName, service.Desc.FullName(), method.Desc.Name())
 
 	if method.Desc.Options().(*descriptorpb.MethodOptions).GetDeprecated() {
 		g.P(deprecationComment)
