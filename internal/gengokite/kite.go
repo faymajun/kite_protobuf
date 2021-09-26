@@ -12,8 +12,6 @@ import (
 const (
 	// 接口
 	kitePackage = protogen.GoImportPath("git.dhgames.cn/svr_comm/kiteg/kiterpc/ikiterpc")
-	// 实现
-	kitePack = protogen.GoImportPath("git.dhgames.cn/svr_comm/kiteg/kiterpc")
 )
 
 // GenerateFile generates a _kite.pb.go file containing gRPC service definitions.
@@ -130,7 +128,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 		g.P(deprecationComment)
 	}
 	serviceDescVar := service.GoName + "_serviceDesc"
-	g.P("func Register", service.GoName, "Server(s *", kitePack.Ident("Server"), ", srv ", serverType, ") {")
+	g.P("func Register", service.GoName, "Server(s *", kitePackage.Ident("Server"), ", srv ", serverType, ") {")
 	g.P("s.RegisterService(&", serviceDescVar, `, srv)`)
 	g.P("}")
 	g.P()
