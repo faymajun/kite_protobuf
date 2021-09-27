@@ -12,7 +12,8 @@ import (
 
 const (
 	// 接口
-	kitePackage = protogen.GoImportPath("git.dhgames.cn/svr_comm/kiteg/kiterpc/ikiterpc")
+	kitePackage = protogen.GoImportPath("git.dhgames.cn/svr_comm/kite/kiterpc/ikiterpc")
+	kiteAsync   = "Async"
 )
 
 // GenerateFile generates a _kite.pb.go file containing gRPC service definitions.
@@ -71,7 +72,15 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 		}
 		g.P(method.Comments.Leading,
 			clientSignature(g, method))
+
+		// 不是流方法
+		if !method.Desc.IsStreamingClient() && !method.Desc.IsStreamingServer() {
+			// 异步方法
+			g.P(method.Comments.Leading,
+				clientASyncSignature(g, method))
+		}
 	}
+
 	g.P("}")
 	g.P()
 
@@ -183,6 +192,17 @@ func clientSignature(g *protogen.GeneratedFile, method *protogen.Method) string 
 	return s
 }
 
+// clientASyncSignature 异步方法
+func clientASyncSignature(g *protogen.GeneratedFile, method *protogen.Method) string {
+	s := kiteAsync + method.GoName + "("
+	if !method.Desc.IsStreamingClient() {
+		s += "in *" + g.QualifiedGoIdent(method.Input.GoIdent)
+	}
+	s += ", opts ..." + g.QualifiedGoIdent(kitePackage.Ident("CallOption")) + ") "
+	s += "*" + g.QualifiedGoIdent(kitePackage.Ident("Call"))
+	return s
+}
+
 func genClientMethod(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, method *protogen.Method, index int) {
 	service := method.Parent
 	// 获取文件名
@@ -198,6 +218,13 @@ func genClientMethod(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 		g.P(`err := c.cc.Invoke("`, sname, `", in, out, opts...)`)
 		g.P("if err != nil { return nil, err }")
 		g.P("return out, nil")
+		g.P("}")
+		g.P()
+
+		// 异步方法
+		g.P("func (c *", unexport(service.GoName), "Client) ", clientASyncSignature(g, method), "{")
+		g.P("out := new(", method.Output.GoIdent, ")")
+		g.P(`return c.cc.AsyncInvoke("`, sname, `", in, out, opts...)`)
 		g.P("}")
 		g.P()
 		return
