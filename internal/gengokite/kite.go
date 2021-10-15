@@ -100,8 +100,8 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 	g.P("}")
 	g.P()
 
-	g.P("func ", clientName, "ele", " (serviceInfo kite.ServiceInfo) ", clientName, " {")
-	g.P("return &", unexport(clientName), "{kite.GetClient(serviceInfo)}")
+	g.P("func ", clientName, "ele", " (serviceInfo ", kite.Ident("ServiceInfo"), ") ", clientName, " {")
+	g.P("return &", unexport(clientName), "{", kite.Ident("GetClient(serviceInfo)"), "}")
 	g.P("}")
 	g.P()
 
