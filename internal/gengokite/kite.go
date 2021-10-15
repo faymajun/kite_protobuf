@@ -99,6 +99,11 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 	g.P("}")
 	g.P()
 
+	g.P("func ", clientName, "ele", " (serviceInfo kite.ServiceInfo) ", clientName, " {")
+	g.P("return &", unexport(clientName), "{kite.GetClient(serviceInfo)}")
+	g.P("}")
+	g.P()
+
 	var methodIndex, streamIndex int
 	// Client method implementations.
 	for _, method := range service.Methods {
