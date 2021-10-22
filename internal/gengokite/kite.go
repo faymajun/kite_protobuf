@@ -12,7 +12,7 @@ import (
 
 const (
 	// 接口
-	kitePackage = protogen.GoImportPath("git.dhgames.cn/svr_comm/kite/internal/invoke/invoker")
+	kitePackage = protogen.GoImportPath("git.dhgames.cn/svr_comm/kite/pkg/invoker")
 	kite        = protogen.GoImportPath("git.dhgames.cn/svr_comm/kite/api/kite")
 	kiteAsync   = "Async"
 )
