@@ -40,7 +40,7 @@ func GenerateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 
 	// TODO: Remove this. We don't need to include these references any more.
 	g.P("// Reference imports to suppress errors if they are not otherwise used.")
-	g.P("var _ ", kitePackage.Ident("IClientConn"))
+	g.P("var _ ", kitePackage.Ident("IClient"))
 	g.P()
 
 	g.P("// This is a compile-time assertion to ensure that this generated file")
@@ -87,7 +87,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 
 	// Client structure.
 	g.P("type ", unexport(clientName), " struct {")
-	g.P("cc ", kitePackage.Ident("IClientConn"))
+	g.P("cc ", kitePackage.Ident("IClient"))
 	g.P("}")
 	g.P()
 
@@ -95,7 +95,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 	if service.Desc.Options().(*descriptorpb.ServiceOptions).GetDeprecated() {
 		g.P(deprecationComment)
 	}
-	g.P("func New", clientName, " (cc ", kitePackage.Ident("IClientConn"), ") ", clientName, " {")
+	g.P("func New", clientName, " (cc ", kitePackage.Ident("IClient"), ") ", clientName, " {")
 	g.P("return &", unexport(clientName), "{cc}")
 	g.P("}")
 	g.P()
