@@ -91,6 +91,14 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 	g.P("}")
 	g.P()
 
+	// 全局
+	g.P("var ", export(service.GoName), " = &", unexport(service.GoName), "{}")
+	g.P()
+
+	g.P("type ", unexport(service.GoName), " struct {")
+	g.P("}")
+	g.P()
+
 	// NewClient factory.
 	if service.Desc.Options().(*descriptorpb.ServiceOptions).GetDeprecated() {
 		g.P(deprecationComment)
@@ -209,6 +217,37 @@ func clientASyncSignature(g *protogen.GeneratedFile, method *protogen.Method) st
 	return s
 }
 
+// 全局----
+func signature(g *protogen.GeneratedFile, method *protogen.Method) string {
+	s := method.GoName + "("
+	s += "serviceInfo " + g.QualifiedGoIdent(kite.Ident("ServiceInfo")) + ", "
+	if !method.Desc.IsStreamingClient() {
+		s += "in *" + g.QualifiedGoIdent(method.Input.GoIdent)
+	}
+	s += ", opts ..." + g.QualifiedGoIdent(kitePackage.Ident("CallOption")) + ") ("
+	if !method.Desc.IsStreamingClient() && !method.Desc.IsStreamingServer() {
+		s += "*" + g.QualifiedGoIdent(method.Output.GoIdent)
+	} else {
+		s += method.Parent.GoName + "_" + method.GoName + "Client"
+	}
+	s += ", error)"
+	return s
+}
+
+// aSyncSignature 异步方法
+func aSyncSignature(g *protogen.GeneratedFile, method *protogen.Method) string {
+	s := kiteAsync + method.GoName + "("
+	s += "serviceInfo " + g.QualifiedGoIdent(kite.Ident("ServiceInfo")) + ", "
+	if !method.Desc.IsStreamingClient() {
+		s += "in *" + g.QualifiedGoIdent(method.Input.GoIdent)
+	}
+	s += ", opts ..." + g.QualifiedGoIdent(kitePackage.Ident("CallOption")) + ") "
+	s += "*" + g.QualifiedGoIdent(kitePackage.Ident("Call"))
+	return s
+}
+
+// 全局-----
+
 func genClientMethod(gen *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFile, method *protogen.Method, index int) {
 	service := method.Parent
 	// 获取文件名
@@ -233,6 +272,21 @@ func genClientMethod(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 		g.P(`return c.cc.AsyncInvoke("`, sname, `", in, out, opts...)`)
 		g.P("}")
 		g.P()
+
+		// 全局
+		g.P("func (c *", unexport(service.GoName), ") ", signature(g, method), "{")
+		g.P("client := &", unexport(service.GoName), "Client{", g.QualifiedGoIdent(kite.Ident("GetClient")), "(serviceInfo)}")
+		g.P("return client.", method.GoName, "(in, opts...)")
+		g.P("}")
+		g.P()
+
+		// 全局-异步方法
+		g.P("func (c *", unexport(service.GoName), ") ", aSyncSignature(g, method), "{")
+		g.P("client := &", unexport(service.GoName), "Client{", g.QualifiedGoIdent(kite.Ident("GetClient")), "(serviceInfo)}")
+		g.P("return client.", kiteAsync, method.GoName, "(in, opts...)")
+		g.P("}")
+		g.P()
+
 		return
 	}
 	streamType := unexport(service.GoName) + method.GoName + "Client"
@@ -388,3 +442,5 @@ func genServerMethod(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 const deprecationComment = "// Deprecated: Do not use."
 
 func unexport(s string) string { return strings.ToLower(s[:1]) + s[1:] }
+
+func export(s string) string { return strings.ToUpper(s[:1]) + s[1:] }
