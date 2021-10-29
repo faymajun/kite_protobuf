@@ -276,15 +276,15 @@ func genClientMethod(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 
 		// 全局
 		g.P("func (c *", unexport(service.GoName), ") ", signature(g, method), "{")
-		g.P("client := &", unexport(service.GoName), "Client{", g.QualifiedGoIdent(kiteClient.Ident("GetClient")), "(serviceInfo)}")
-		g.P("return client.", method.GoName, "(in, opts...)")
+		g.P("cli := &", unexport(service.GoName), "Client{", g.QualifiedGoIdent(kiteClient.Ident("GetClient")), "(serviceInfo)}")
+		g.P("return cli.", method.GoName, "(in, opts...)")
 		g.P("}")
 		g.P()
 
 		// 全局-异步方法
 		g.P("func (c *", unexport(service.GoName), ") ", aSyncSignature(g, method), "{")
-		g.P("client := &", unexport(service.GoName), "Client{", g.QualifiedGoIdent(kiteClient.Ident("GetClient")), "(serviceInfo)}")
-		g.P("return client.", kiteAsync, method.GoName, "(in, opts...)")
+		g.P("cli := &", unexport(service.GoName), "Client{", g.QualifiedGoIdent(kiteClient.Ident("GetClient")), "(serviceInfo)}")
+		g.P("return cli.", kiteAsync, method.GoName, "(in, opts...)")
 		g.P("}")
 		g.P()
 
