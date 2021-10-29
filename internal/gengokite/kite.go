@@ -13,7 +13,8 @@ import (
 const (
 	// 接口
 	kitePackage = protogen.GoImportPath("git.dhgames.cn/svr_comm/kite/pkg/invoker")
-	kite        = protogen.GoImportPath("git.dhgames.cn/svr_comm/kite/api/kite")
+	kite        = protogen.GoImportPath("git.dhgames.cn/svr_comm/kite")
+	kiteClient  = protogen.GoImportPath("git.dhgames.cn/svr_comm/kite/cmd/client")
 	kiteAsync   = "Async"
 )
 
@@ -109,7 +110,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 	g.P()
 
 	g.P("func Get", clientName, " (serviceInfo ", kite.Ident("ServiceInfo"), ") ", clientName, " {")
-	g.P("return &", unexport(clientName), "{", kite.Ident("GetClient(serviceInfo)"), "}")
+	g.P("return &", unexport(clientName), "{", kiteClient.Ident("GetClient(serviceInfo)"), "}")
 	g.P("}")
 	g.P()
 
@@ -275,14 +276,14 @@ func genClientMethod(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 
 		// 全局
 		g.P("func (c *", unexport(service.GoName), ") ", signature(g, method), "{")
-		g.P("client := &", unexport(service.GoName), "Client{", g.QualifiedGoIdent(kite.Ident("GetClient")), "(serviceInfo)}")
+		g.P("client := &", unexport(service.GoName), "Client{", g.QualifiedGoIdent(kiteClient.Ident("GetClient")), "(serviceInfo)}")
 		g.P("return client.", method.GoName, "(in, opts...)")
 		g.P("}")
 		g.P()
 
 		// 全局-异步方法
 		g.P("func (c *", unexport(service.GoName), ") ", aSyncSignature(g, method), "{")
-		g.P("client := &", unexport(service.GoName), "Client{", g.QualifiedGoIdent(kite.Ident("GetClient")), "(serviceInfo)}")
+		g.P("client := &", unexport(service.GoName), "Client{", g.QualifiedGoIdent(kiteClient.Ident("GetClient")), "(serviceInfo)}")
 		g.P("return client.", kiteAsync, method.GoName, "(in, opts...)")
 		g.P("}")
 		g.P()
