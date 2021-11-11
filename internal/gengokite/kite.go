@@ -191,7 +191,7 @@ func genServerMethod(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 	service := method.Parent
 
 	if !method.Desc.IsStreamingClient() && !method.Desc.IsStreamingServer() {
-		g.P("func (s *", export(service.GoName), "Service) ", method.GoName, "Add(function string, reqPBData []byte) (resPBData []byte, err error) {")
+		g.P("func (s *", export(service.GoName), "Service) ", method.GoName, "(function string, reqPBData []byte) (resPBData []byte, err error) {")
 		g.P("req := new(", method.Input.GoIdent, ")")
 		g.P(g.QualifiedGoIdent(PB.Ident("Unmarshal(reqPBData, req)")))
 		g.P("res := new(", method.Output.GoIdent, ")")
