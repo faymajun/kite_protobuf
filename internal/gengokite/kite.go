@@ -165,6 +165,7 @@ func genClientMethod(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 		g.P("response = new(", method.Output.GoIdent, ")")
 		g.P("err = ", g.QualifiedGoIdent(PB.Ident("Unmarshal(resPBData, response)")))
 		g.P("return")
+		g.P("}")
 		g.P()
 
 		return
