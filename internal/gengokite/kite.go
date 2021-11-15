@@ -106,7 +106,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 
 	fileName := path.Base(file.GeneratedFilenamePrefix)
 	g.P("func Reg", export(service.GoName), "Server(handle ", serverType, ") {")
-	g.P(g.QualifiedGoIdent(PB.Ident("ServiceDispatchObject.AddService")), `("`, fileName, `", "`, service.Desc.FullName(), `", &`, export(service.GoName), "Service{handle: handle})")
+	g.P(g.QualifiedGoIdent(PB.Ident("ServiceDispatchObject.AddService")), `("`, fileName, `", "`, export(service.GoName), `", &`, export(service.GoName), "Service{handle: handle})")
 	g.P("}")
 	g.P()
 
@@ -160,7 +160,7 @@ func genClientMethod(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 		g.P("reqPBData, err := ", g.QualifiedGoIdent(PB.Ident("Marshal(request)")))
 		g.P("if err != nil { return nil, ", g.QualifiedGoIdent(errors.Ident(`New("request marshal err")}`)))
 
-		g.P(`resPBData, err := `, g.QualifiedGoIdent(kite.Ident("Invoke")), `(destination, "`, fileName, `", "`, service.Desc.FullName(), `", "`, method.Desc.Name(), `", reqPBData, opts...)`)
+		g.P(`resPBData, err := `, g.QualifiedGoIdent(kite.Ident("Invoke")), `(destination, "`, fileName, `", "`, export(service.GoName), `", "`, method.Desc.Name(), `", reqPBData, opts...)`)
 		g.P("if err != nil { return nil, err }")
 		g.P("response = new(", method.Output.GoIdent, ")")
 		g.P("err = ", g.QualifiedGoIdent(PB.Ident("Unmarshal(resPBData, response)")))
