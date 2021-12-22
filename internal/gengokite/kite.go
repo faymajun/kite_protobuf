@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	PB     = protogen.GoImportPath("git.dhgames.cn/svr_comm/kite/pb")
+	server = protogen.GoImportPath("git.dhgames.cn/svr_comm/kite/server")
+	proto  = protogen.GoImportPath("google.golang.org/protobuf/proto")
 	kite   = protogen.GoImportPath("git.dhgames.cn/svr_comm/kite")
 	errors = protogen.GoImportPath("errors")
 )
@@ -106,7 +107,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 
 	fileName := path.Base(file.GeneratedFilenamePrefix)
 	g.P("func Reg", export(service.GoName), "Server(handle ", serverType, ") {")
-	g.P(g.QualifiedGoIdent(PB.Ident("ServiceDispatchObject.AddService")), `("`, fileName, `", "`, export(service.GoName), `", &`, export(service.GoName), "Service{handle: handle})")
+	g.P(g.QualifiedGoIdent(server.Ident("ServiceDispatchObject.AddService")), `("`, fileName, `", "`, export(service.GoName), `", &`, export(service.GoName), "Service{handle: handle})")
 	g.P("}")
 	g.P()
 
@@ -157,13 +158,13 @@ func genClientMethod(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 	}
 	g.P("func (c *", unExport(service.GoName), ") ", clientSignature(g, method), "{")
 	if !method.Desc.IsStreamingServer() && !method.Desc.IsStreamingClient() {
-		g.P("reqPBData, err := ", g.QualifiedGoIdent(PB.Ident("Marshal(request)")))
+		g.P("reqPBData, err := ", g.QualifiedGoIdent(proto.Ident("Marshal(request)")))
 		g.P("if err != nil { return nil, ", g.QualifiedGoIdent(errors.Ident(`New("request marshal err")}`)))
 
 		g.P(`resPBData, err := `, g.QualifiedGoIdent(kite.Ident("Invoke")), `(destination, "`, fileName, `", "`, export(service.GoName), `", "`, method.Desc.Name(), `", reqPBData, opts...)`)
 		g.P("if err != nil { return nil, err }")
 		g.P("response = new(", method.Output.GoIdent, ")")
-		g.P("err = ", g.QualifiedGoIdent(PB.Ident("Unmarshal(resPBData, response)")))
+		g.P("err = ", g.QualifiedGoIdent(proto.Ident("Unmarshal(resPBData, response)")))
 		g.P("return")
 		g.P("}")
 		g.P()
@@ -193,10 +194,10 @@ func genServerMethod(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 	if !method.Desc.IsStreamingClient() && !method.Desc.IsStreamingServer() {
 		g.P("func (s *", export(service.GoName), "Service) ", method.GoName, "(function string, reqPBData []byte) (resPBData []byte, err error) {")
 		g.P("req := new(", method.Input.GoIdent, ")")
-		g.P(g.QualifiedGoIdent(PB.Ident("Unmarshal(reqPBData, req)")))
+		g.P(g.QualifiedGoIdent(proto.Ident("Unmarshal(reqPBData, req)")))
 		g.P("res := new(", method.Output.GoIdent, ")")
 		g.P("res, err = s.handle.", method.GoName, "(req)")
-		g.P("if err == nil { resPBData, err = pb.Marshal(res) }")
+		g.P("if err == nil { resPBData, err = proto.Marshal(res) }")
 		g.P("return")
 		g.P("}")
 		g.P("")
