@@ -195,7 +195,7 @@ func genServerMethod(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 		g.P("func (s *", export(service.GoName), "Service) ", method.GoName, "(function string, reqPBData []byte) (resPBData []byte, err error) {")
 		g.P("req := new(", method.Input.GoIdent, ")")
 		g.P(g.QualifiedGoIdent(proto.Ident("Unmarshal(reqPBData, req)")))
-		g.P("res := new(", method.Output.GoIdent, ")")
+		g.P("var res *", method.Output.GoIdent)
 		g.P("res, err = s.handle.", method.GoName, "(req)")
 		g.P("if err == nil { resPBData, err = proto.Marshal(res) }")
 		g.P("return")
