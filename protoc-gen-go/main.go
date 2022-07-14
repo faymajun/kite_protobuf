@@ -22,10 +22,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/golang/protobuf/internal/gengokite"
 	"strings"
 
 	"github.com/golang/protobuf/internal/gengogrpc"
+	"github.com/golang/protobuf/internal/gengokite"
 	gengo "google.golang.org/protobuf/cmd/protoc-gen-go/internal_gengo"
 	"google.golang.org/protobuf/compiler/protogen"
 )
@@ -72,6 +72,7 @@ func main() {
 				gengogrpc.GenerateFileContent(gen, f, g)
 			}
 			if kite {
+				// gennew.GenNew(gen, f, g)
 				gengokite.GenerateFileContent(gen, f, g)
 			}
 		}
