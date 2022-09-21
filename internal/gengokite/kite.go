@@ -12,6 +12,7 @@ const (
 	server = protogen.GoImportPath("git.dhgames.cn/svr_comm/kite/server")
 	proto  = protogen.GoImportPath("google.golang.org/protobuf/proto")
 	kite   = protogen.GoImportPath("git.dhgames.cn/svr_comm/kite")
+	http   = protogen.GoImportPath("git.dhgames.cn/svr_comm/kite/http")
 	errors = protogen.GoImportPath("errors")
 )
 
@@ -108,6 +109,11 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 	fileName := path.Base(file.GeneratedFilenamePrefix)
 	g.P("func Reg", export(service.GoName), "Server(handle ", serverType, ") {")
 	g.P(g.QualifiedGoIdent(server.Ident("ServiceDispatchObject.AddService")), `("`, fileName, `", "`, export(service.GoName), `", &`, export(service.GoName), "Service{handle: handle})")
+	g.P("}")
+	g.P()
+
+	g.P("func Reg", export(service.GoName), "HTTPServer(route string, handle ", serverType, ") {")
+	g.P(g.QualifiedGoIdent(http.Ident("Dispatch.AddRoute")), `(route, &`, export(service.GoName), "Service{handle: handle})")
 	g.P("}")
 	g.P()
 
