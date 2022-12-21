@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	server = protogen.GoImportPath("git.dhgames.cn/svr_comm/kite/server")
+	server = protogen.GoImportPath("git.dhgames.cn/svr_comm/kite/v2/server")
 	proto  = protogen.GoImportPath("google.golang.org/protobuf/proto")
-	kite   = protogen.GoImportPath("git.dhgames.cn/svr_comm/kite")
+	kite   = protogen.GoImportPath("git.dhgames.cn/svr_comm/kite/v2/kite")
 	errors = protogen.GoImportPath("errors")
 )
 
