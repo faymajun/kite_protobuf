@@ -24,8 +24,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/golang/protobuf/internal/gengogrpc"
 	"github.com/golang/protobuf/internal/gengokite"
+
+	"github.com/golang/protobuf/internal/gengogrpc"
+	"github.com/golang/protobuf/internal/gengokitev2"
 	gengo "google.golang.org/protobuf/cmd/protoc-gen-go/internal_gengo"
 	"google.golang.org/protobuf/compiler/protogen"
 )
@@ -52,12 +54,15 @@ func main() {
 	}.Run(func(gen *protogen.Plugin) error {
 		grpc := false
 		kite := false
+		kitev2 := false
 		for _, plugin := range strings.Split(*plugins, ",") {
 			switch plugin {
 			case "grpc":
 				grpc = true
 			case "kite":
 				kite = true
+			case "kitev2":
+				kitev2 = true
 			case "":
 			default:
 				return fmt.Errorf("protoc-gen-go: unknown plugin %q", plugin)
@@ -74,6 +79,10 @@ func main() {
 			if kite {
 				// gennew.GenNew(gen, f, g)
 				gengokite.GenerateFileContent(gen, f, g)
+			}
+			if kitev2 {
+				// gennew.GenNew(gen, f, g)
+				gengokitev2.GenerateFileContent(gen, f, g)
 			}
 		}
 		gen.SupportedFeatures = gengo.SupportedFeatures
