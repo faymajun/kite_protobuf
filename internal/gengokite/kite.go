@@ -102,6 +102,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 
 	g.P("type ", export(service.GoName), "Service struct {")
 	g.P("handle ", export(service.GoName), "Server")
+	g.P("Sender *kite.Destination")
 	g.P("}")
 	g.P()
 
@@ -114,11 +115,12 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 	// Server handler implementations.
 
 	// generate DO
-	g.P("func (s *", export(service.GoName), "Service) Do(function string, reqPBData []byte) (resPBData []byte, err error) {")
+	g.P("func (s *", export(service.GoName), "Service) Do(function string, reqPBData []byte, sender *kite.Destination) (resPBData []byte, err error) {")
+	g.P("ns := &", export(service.GoName), "Service{handle: s.handle, Sender: sender}")
 	g.P("switch function {")
 	for _, method := range service.Methods {
 		g.P(`case "`, method.GoName, `":`)
-		g.P("return s.", method.GoName, `(reqPBData)`)
+		g.P("return ns.", method.GoName, `(reqPBData)`)
 	}
 	g.P("default:")
 	g.P(`err = `, g.QualifiedGoIdent(errors.Ident(`New("function is not found")`)))
