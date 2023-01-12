@@ -91,6 +91,8 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 		}
 		g.P(method.Comments.Leading,
 			serverSignature(g, method))
+		g.P("New() ", serverType, "// if return nil then SetMeta is invalid")
+		g.P("SetMeta(meta *kite.Meta)")
 	}
 	g.P("}")
 	g.P()
@@ -102,7 +104,6 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 
 	g.P("type ", export(service.GoName), "Service struct {")
 	g.P("handle ", export(service.GoName), "Server")
-	g.P("Sender *kite.Destination")
 	g.P("}")
 	g.P()
 
@@ -116,11 +117,10 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 
 	// generate DO
 	g.P("func (s *", export(service.GoName), "Service) Do(function string, reqPBData []byte, sender *kite.Destination) (resPBData []byte, err error) {")
-	g.P("ns := &", export(service.GoName), "Service{handle: s.handle, Sender: sender}")
 	g.P("switch function {")
 	for _, method := range service.Methods {
 		g.P(`case "`, method.GoName, `":`)
-		g.P("return ns.", method.GoName, `(reqPBData)`)
+		g.P("return s.", method.GoName, `(reqPBData, sender)`)
 	}
 	g.P("default:")
 	g.P(`err = `, g.QualifiedGoIdent(errors.Ident(`New("function is not found")`)))
@@ -194,11 +194,17 @@ func genServerMethod(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 	service := method.Parent
 
 	if !method.Desc.IsStreamingClient() && !method.Desc.IsStreamingServer() {
-		g.P("func (s *", export(service.GoName), "Service) ", method.GoName, "(reqPBData []byte) (resPBData []byte, err error) {")
+		g.P("func (s *", export(service.GoName), "Service) ", method.GoName, "(reqPBData []byte, sender *kite.Destination) (resPBData []byte, err error) {")
+		g.P("handle := s.handle.New()")
+		g.P("if handle == nil {")
+		g.P("handle = s.handle")
+		g.P("} else {")
+		g.P("handle.SetMeta(&kite.Meta{Sender: sender})")
+		g.P("}")
 		g.P("req := new(", method.Input.GoIdent, ")")
 		g.P(g.QualifiedGoIdent(proto.Ident("Unmarshal(reqPBData, req)")))
 		g.P("var res *", method.Output.GoIdent)
-		g.P("res, err = s.handle.", method.GoName, "(req)")
+		g.P("res, err = handle.", method.GoName, "(req)")
 		g.P("if err == nil { resPBData, err = proto.Marshal(res) }")
 		g.P("return")
 		g.P("}")
