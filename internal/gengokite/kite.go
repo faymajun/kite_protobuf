@@ -84,6 +84,8 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 	}
 	g.Annotate(serverType, service.Location)
 	g.P("type ", serverType, " interface {")
+	g.P("New() ", serverType, "// if return nil then SetMeta is invalid")
+	g.P("SetMeta(meta *kite.Meta)")
 	for _, method := range service.Methods {
 		g.Annotate(serverType+"."+method.GoName, method.Location)
 		if method.Desc.Options().(*descriptorpb.MethodOptions).GetDeprecated() {
@@ -91,8 +93,6 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 		}
 		g.P(method.Comments.Leading,
 			serverSignature(g, method))
-		g.P("New() ", serverType, "// if return nil then SetMeta is invalid")
-		g.P("SetMeta(meta *kite.Meta)")
 	}
 	g.P("}")
 	g.P()
